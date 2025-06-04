@@ -1,33 +1,33 @@
-import { useEffect, useState } from 'react';
+import { GetStaticProps } from 'next';
+import Header from '@/components/layout/Header';
 import PostCard from '@/components/common/PostCard';
 import { PostProps } from '@/interfaces';
-import Header from '@/components/layout/Header';
 
-export default function PostsPage() {
-  const [posts, setPosts] = useState<PostProps[]>([]);
+interface PostsPageProps {
+  posts: PostProps[];
+}
 
-  useEffect(() => {
-    fetch('https://jsonplaceholder.typicode.com/posts?_limit=10')
-      .then(res => res.json())
-      .then(data => setPosts(data))
-      .catch(err => console.error('Error fetching posts:', err));
-  }, []);
-
+export default function PostsPage({ posts }: PostsPageProps) {
   return (
     <div>
       <Header />
       <main className="p-6">
         <h1 className="text-2xl font-bold mb-4">Posts</h1>
         {posts.map(post => (
-          <PostCard
-            key={post.id}
-            title={post.title}
-            body={post.body}
-            userId={post.userId}
-            id={post.id}
-          />
+          <PostCard key={post.id} {...post} />
         ))}
       </main>
     </div>
   );
 }
+
+export const getStaticProps: GetStaticProps = async () => {
+  const res = await fetch('https://jsonplaceholder.typicode.com/posts');
+  const posts = await res.json();
+
+  return {
+    props: {
+      posts,
+    },
+  };
+};
